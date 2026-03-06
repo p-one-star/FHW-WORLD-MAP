@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FHW WORLD MAP</title>
+    <!-- Black Ops One フォントの読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    
+    <style>
+        /* === CSS VARIABLES === */
+        :root {
+            --bg-color: #555555; 
+            --cyan: #00ffff;
+            --lime: #ccff00;
+            --pink: #ff00ff;
+            --text-color: #ffffff;
+            --tire-color: #000000; 
+            --font-main: 'Arial Black', Impact, 'Segoe UI', sans-serif;
+            --font-stencil: 'Black Ops One', Impact, cursive, sans-serif;
+        }
+
+        /* === BASE STYLES === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden; 
+        }
+
+        /* === MAP VIEWPORT & CANVAS === */
+        .viewport {
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            cursor: grab;
+            position: relative;
+        }
+        
+        .viewport:active {
+            cursor: grabbing;
+        }
+
+        .map-canvas {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            min-width: 1200px;
+            min-height: 900px;
+            background-color: var(--bg-color);
+            overflow: hidden;
+        }
+
+        /* === SVG ROADS (タイヤ痕) === */
+        .roads-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* === CENTER TITLE === */
+        .center-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 20px 40px;
+            border: 4px solid #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #ffffff, inset 0 0 15px rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+        }
+
+        /* タイトル全体の設定 */
+        .title-wrapper {
+            position: relative;
+            display: block;
+            font-family: var(--font-stencil);
+            font-size: clamp(2.5rem, 6vw, 4rem); 
+            margin: 0;
+            line-height: 1.1;
+            font-style: italic;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap; 
+        }
+
+        /* 文字のベースとなる箱 */
+        .char-box {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* 背景の固定ネオン */
+        .char-neon {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: transparent; 
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 発光の色分け */
+        .word-fhw .char-neon { text-shadow: 0 0 3px var(--cyan), 0 0 10px var(--cyan); }
+        .word-world .char-neon { text-shadow: 0 0 3px var(--lime), 0 0 10px var(--lime); }
+        .word-map .char-neon { text-shadow: 0 0 3px var(--pink), 0 0 10px var(--pink); }
+
+        /* 手前の動く黒文字 */
+        .char-black {
+            position: relative;
+            display: inline-block;
+            color: #000000;
+            z-index: 2;
+            text-shadow: none; 
+            animation: waveScale 5.5s infinite ease-in-out;
+            animation-delay: calc(var(--i) * 0.02s);
+            transform-origin: center;
+        }
+
+        @keyframes waveScale {
+            0%   { transform: scale(1); }
+            2.7% { transform: scale(1.2); } 
+            5.5% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+
+        .space {
+            display: inline-block;
+            width: 0.2em;
+        }
+
+        /* サブタイトル */
+        .center-title h2 {
+            font-family: var(--font-main); 
+            font-size: clamp(1.2rem, 3.5vw, 1.8rem); 
+            font-weight: 900; 
+            color: rgba(255, 255, 255, 0.8); 
+            margin-top: 15px;
+            letter-spacing: 1.5px;
+            text-shadow: none;
+            text-transform: none; 
+            font-style: normal;
+        }
+
+        /* === ZONES === */
+        .zone {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            width: 220px;
+            background: #111;
+            border: 4px solid var(--theme-color);
+            border-radius: 0;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .zone::before {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px dashed var(--theme-color);
+            pointer-events: none;
+        }
+
+        .zone:hover {
+            transform: translate(-50%, -50%) scale(1.08);
+            z-index: 30;
+            background: #1a1a1a;
+            box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.9);
+        }
+
+        .zone-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .zone:hover .zone-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .zone-title {
+            font-family: var(--font-stencil);
+            font-size: 1.4rem;
+            color: var(--theme-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-style: italic;
+            line-height: 1.1;
+        }
+
+        .zone-desc {
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 1.4;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+
+        .zone.cyan { --theme-color: var(--cyan); }
+        .zone.lime { --theme-color: var(--lime); }
+        .zone.pink { --theme-color: var(--pink); }
+
+        /* === LOCKED ZONES === */
+        .zone.locked {
+            --theme-color: #444; 
+            background: #222;
+            border-style: dashed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .zone.locked:hover {
+            --theme-color: #ffffff; 
+        }
+
+        .locked-badge {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: #ff0000; 
+            color: #000;
+            font-weight: 900;
+            padding: 5px 10px;
+            border: 3px solid #000;
+            transform: rotate(15deg);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            z-index: 25;
+        }
+
+        .zone-huge-question {
+            font-family: var(--font-stencil);
+            font-size: 7.5rem;
+            color: #ffffff;
+            line-height: 1;
+            margin-top: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .zone.locked:hover .zone-huge-question {
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* === YOU ARE HERE MARKER === */
+        .you-are-here {
+            position: absolute;
+            transform: translate(-50%, 25px);
+            z-index: 25;
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .yah-text {
+            background: var(--lime);
+            color: #000;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            border: 1px solid #000;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+        }
+
+        /* === PLAYER CAR (走る車) === */
+        .player-car {
+            position: absolute;
+            left: 42%; 
+            top: 38%;
+            transform: translate(-50%, -50%) scaleX(-1); 
+            z-index: 100; 
+            pointer-events: none; 
+        }
+
+        .car-sprite {
+            font-size: 3.5rem;
+            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.8));
+            animation: idleBounce 0.4s infinite alternate ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes idleBounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-4px); }
+        }
+
+        /* =========================================================
+           激辛ジャンプスケア用：光に飲み込まれるホワイトフラッシュ
+        ========================================================= */
+        
+        .zoom-attack {
+            z-index: 9999 !important;
+            transform-origin: 50% 50% !important;
+            /* UI自体が激しく発光しながら荒ぶって巨大化する */
+            animation: whiteFlashAttack 0.3s cubic-bezier(0.7, 0, 1, 1) forwards !important;
+            box-shadow: 0 0 200px var(--theme-color), inset 0 0 100px var(--theme-color) !important;
+        }
+
+        @keyframes whiteFlashAttack {
+            0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: brightness(1) blur(0px); }
+            20%  { transform: translate(-52%, -48%) scale(3) rotate(3deg); filter: brightness(2) blur(1px); }
+            40%  { transform: translate(-47%, -53%) scale(8) rotate(-4deg); filter: brightness(5) blur(2px); }
+            60%  { transform: translate(-54%, -46%) scale(15) rotate(6deg); filter: brightness(10) blur(4px); }
+            80%  { transform: translate(-46%, -54%) scale(30) rotate(-8deg); filter: brightness(50) blur(8px); }
+            100% { transform: translate(-50%, -50%) scale(60) rotate(12deg); filter: brightness(100) blur(12px); background: #fff; }
+        }
+
+        /* 画面を真っ白にするオーバーレイ */
+        .whiteflash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #ffffff;
+            z-index: 10000; 
+            opacity: 0;
+            pointer-events: none;
+            /* 瞬時に白くなる */
+            transition: opacity 0.1s ease-out;
+        }
+
+        .whiteflash-overlay.active {
+            opacity: 1;
+            pointer-events: auto; 
+        }
+
+        /* === MODAL STYLES === */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-box {
+            background: #111;
+            border: 4px solid var(--cyan);
+            padding: 40px;
+            text-align: center;
+            transform: scale(1);
+            transition: transform 0.2s ease;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-overlay.hidden .modal-box {
+            transform: scale(0.9);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-box h3 {
+            font-family: var(--font-stencil);
+            color: var(--cyan);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
+        .modal-box p {
+            color: #fff;
+            font-family: sans-serif;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            font-family: var(--font-stencil);
+            background: var(--cyan);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn:hover {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- フラッシュ用の真っ白なレイヤー -->
+    <div id="whiteflash-overlay" class="whiteflash-overlay"></div>
+
+    <div class="viewport" id="viewport">
+        <div class="map-canvas">
+            
+            <!-- SVG Roads -->
+            <svg class="roads-layer" xmlns="http://www.w3.org/2000/svg">
+                <g stroke="var(--tire-color)" opacity="0.9">
+                    <line x1="50%" y1="15%" x2="50%" y2="85%" stroke-width="14" stroke-dasharray="12 10" transform="translate(-16, 0)" />
+                    <line x1="50%" y1="15%" x2="50%" y2="85%" stroke-width="14" stroke-dasharray="12 10" transform="translate(16, 0)" />
+                </g>
+                <g stroke="var(--tire-color)" opacity="0.9">
+                    <line x1="15%" y1="50%" x2="85%" y2="50%" stroke-width="14" stroke-dasharray="12 10" transform="translate(0, -16)" />
+                    <line x1="15%" y1="50%" x2="85%" y2="50%" stroke-width="14" stroke-dasharray="12 10" transform="translate(0, 16)" />
+                </g>
+                <g stroke="var(--tire-color)" opacity="0.7">
+                    <line x1="50%" y1="50%" x2="25%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, -6)" />
+                    <line x1="50%" y1="50%" x2="25%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, 6)" />
+                    <line x1="50%" y1="50%" x2="75%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, -6)" />
+                    <line x1="50%" y1="50%" x2="75%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, 6)" />
+                    <line x1="50%" y1="50%" x2="75%" y2="80%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, 6)" />
+                    <line x1="50%" y1="50%" x2="75%" y2="80%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, -6)" />
+                </g>
+            </svg>
+
+            <!-- Center Title -->
+            <div class="center-title">
+                <h1 class="title-wrapper">
+                    <!-- FHW -->
+                    <span class="word-fhw">
+                        <span class="char-box"><span class="char-neon">F</span><span class="char-black" style="--i:0">F</span></span><span class="char-box"><span class="char-neon">H</span><span class="char-black" style="--i:1">H</span></span><span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:2">W</span></span>
+                    </span>
+                    <span class="space">&nbsp;</span>
+                    
+                    <!-- WORLD -->
+                    <span class="word-world">
+                        <span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:3">W</span></span><span class="char-box"><span class="char-neon">O</span><span class="char-black" style="--i:4">O</span></span><span class="char-box"><span class="char-neon">R</span><span class="char-black" style="--i:5">R</span></span><span class="char-box"><span class="char-neon">L</span><span class="char-black" style="--i:6">L</span></span><span class="char-box"><span class="char-neon">D</span><span class="char-black" style="--i:7">D</span></span>
+                    </span>
+                    <span class="space">&nbsp;</span>
+                    
+                    <!-- MAP -->
+                    <span class="word-map">
+                        <span class="char-box"><span class="char-neon">M</span><span class="char-black" style="--i:8">M</span></span><span class="char-box"><span class="char-neon">A</span><span class="char-black" style="--i:9">A</span></span><span class="char-box"><span class="char-neon">P</span><span class="char-black" style="--i:10">P</span></span>
+                    </span>
+                </h1>
+                <!-- サブタイトル -->
+                <h2>Too fast.&nbsp;&nbsp;&nbsp;Too stupid.&nbsp;&nbsp;&nbsp;Too Funky.</h2>
+            </div>
+
+            <!-- === YOU ARE HERE MARKER === -->
+            <div id="you-are-here-marker" class="you-are-here" style="left: 42%; top: 38%;">
+                <div class="yah-text">YOU ARE HERE</div>
+            </div>
+
+            <!-- === PLAYER CAR === -->
+            <div id="player-car" class="player-car">
+                <div class="car-sprite">🚗</div>
+            </div>
+
+            <!-- === ACTIVE ZONES === -->
+            <div class="zone lime" style="left: 50%; top: 15%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/GARAGE-01/', false)">
+                <div class="zone-icon">🌭</div>
+                <div class="zone-title">GARAGE</div>
+                <div class="zone-desc">Secret underground garage where machines are built.</div>
+            </div>
+
+            <div class="zone cyan" style="left: 15%; top: 50%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-STORAGE/', false)">
+                <div class="zone-icon">🍔</div>
+                <div class="zone-title">FUNKY STORAGE</div>
+                <div class="zone-desc">Warehouse of funky products and posters.</div>
+            </div>
+
+            <div class="zone pink" style="left: 50%; top: 85%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/RIOT-CARNIVAL/', false)">
+                <div class="zone-icon">🌶</div>
+                <div class="zone-title">RIOT CARNIVAL</div>
+                <div class="zone-desc">Chaotic carnival of wild characters.</div>
+            </div>
+
+            <div class="zone cyan" style="left: 85%; top: 50%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-COMIC/', false)">
+                <div class="zone-icon">🎨</div>
+                <div class="zone-title">FUNKY COMIC</div>
+                <div class="zone-desc">Comic area showing FHW comic stories.</div>
+            </div>
+
+            <!-- === LOCKED ZONES === -->
+            <div class="zone locked" style="left: 25%; top: 25%;" onclick="handleZoneClick(this, '', true)">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-huge-question">?</div>
+            </div>
+
+            <div class="zone locked" style="left: 75%; top: 25%;" onclick="handleZoneClick(this, '', true)">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-huge-question">?</div>
+            </div>
+
+            <div class="zone locked" style="left: 75%; top: 80%;" onclick="handleZoneClick(this, '', true)">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-huge-question">?</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- === CUSTOM MODAL (LOCKED用) === -->
+    <div id="construction-modal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.8);">
+        <div class="modal-box">
+            <div class="modal-icon">🚧</div>
+            <h3>AREA UNDER CONSTRUCTION</h3>
+            <p>This zone is currently sealed off by the FHW crew. Check back later for the grand opening!</p>
+            <button class="modal-btn" onclick="closeModal()">Got It</button>
+        </div>
+    </div>
+
+    <!-- === JAVASCRIPT === -->
+    <script>
+        const car = document.getElementById('player-car');
+        let currentX = 42; 
+        let currentY = 38;
+        let isDriving = false; 
+        let carDirection = -1; // 初期値は右向き
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function moveSegment(x, y) {
+            if (currentX === x && currentY === y) return;
+
+            const dx = x - currentX;
+            const dy = y - currentY;
+            
+            if (dx > 0) {
+                carDirection = -1; 
+            } else if (dx < 0) {
+                carDirection = 1;  
+            }
+
+            car.style.transition = 'transform 0.2s ease';
+            car.style.transform = `translate(-50%, -50%) scaleX(${carDirection})`;
+            await wait(200); 
+
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const speedMs = Math.max(500, dist * 15);
+
+            car.style.transition = `left ${speedMs}ms linear, top ${speedMs}ms linear, transform 0.2s ease`;
+            car.style.left = `${x}%`;
+            car.style.top = `${y}%`;
+
+            await wait(speedMs); 
+            currentX = x;
+            currentY = y;
+        }
+
+        async function driveTo(targetX, targetY) {
+            const centerX = 50;
+            const centerY = 50;
+
+            if ((currentX !== centerX || currentY !== centerY) && (targetX !== currentX || targetY !== currentY)) {
+                await moveSegment(centerX, centerY);
+            }
+            await moveSegment(targetX, targetY);
+        }
+
+        let activeZoomElement = null;
+
+        // ★ メインの突進・ホワイトフラッシュ処理
+        async function handleZoneClick(element, url, isLocked) {
+            if (isDriving) return; 
+            isDriving = true;
+
+            const yahMarker = document.getElementById('you-are-here-marker');
+            if (yahMarker) yahMarker.style.opacity = '0';
+
+            const targetX = parseFloat(element.style.left);
+            const targetY = parseFloat(element.style.top);
+
+            await driveTo(targetX, targetY);
+
+            // 到着後の「アレ？」というタメ
+            await wait(300);
+
+            // ★ UI自身が激しく発光しながら迫ってくる！
+            activeZoomElement = element;
+            element.classList.add('zoom-attack');
+            
+            // 拡大の途中で画面全体をホワイトフラッシュさせる (0.15秒後)
+            await wait(150);
+
+            const whiteflash = document.getElementById('whiteflash-overlay');
+            whiteflash.classList.add('active');
+
+            // 真っ白な状態をキープ
+            await wait(400);
+
+            if (isLocked) {
+                // LOCKEDの場合：フラッシュから覚めると警告が出ている演出
+                const modal = document.getElementById('construction-modal');
+                modal.classList.remove('hidden');
+                
+                // フワッと白飛びから回復させる
+                whiteflash.style.transition = "opacity 0.5s ease";
+                whiteflash.classList.remove('active');
+                
+                // 元の速度に戻しておく
+                setTimeout(() => {
+                    whiteflash.style.transition = "opacity 0.1s ease-out";
+                }, 500);
+
+                isDriving = false;
+            } else if (url) {
+                // 通常ジャンプ
+                window.location.href = url;
+                
+                // ブラウザバック対策
+                setTimeout(() => {
+                    element.classList.remove('zoom-attack');
+                    whiteflash.classList.remove('active');
+                    isDriving = false;
+                }, 1000);
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('construction-modal');
+            modal.classList.add('hidden');
+            
+            if (activeZoomElement) {
+                activeZoomElement.classList.remove('zoom-attack');
+                activeZoomElement = null;
+            }
+        }
+
+        // --- マップのパン（ドラッグ移動）処理 ---
+        window.addEventListener('load', () => {
+            const viewport = document.getElementById('viewport');
+            const scrollLeft = (viewport.scrollWidth - viewport.clientWidth) / 2;
+            const scrollTop = (viewport.scrollHeight - viewport.clientHeight) / 2;
+            viewport.scrollTo({ left: scrollLeft, top: scrollTop, behavior: 'smooth' });
+        });
+
+        const viewport = document.getElementById('viewport');
+        let isDown = false, startX, startY, scrollLeft, scrollTop;
+
+        viewport.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - viewport.offsetLeft;
+            startY = e.pageY - viewport.offsetTop;
+            scrollLeft = viewport.scrollLeft;
+            scrollTop = viewport.scrollTop;
+        });
+
+        viewport.addEventListener('mouseleave', () => isDown = false);
+        viewport.addEventListener('mouseup', () => isDown = false);
+        viewport.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - viewport.offsetLeft;
+            const y = e.pageY - viewport.offsetTop;
+            viewport.scrollLeft = scrollLeft - (x - startX) * 1.5;
+            viewport.scrollTop = scrollTop - (y - startY) * 1.5;
+        });
+    </script>
+</body>
+</html>
+
+
