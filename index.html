@@ -267,7 +267,7 @@
         /* === YOU ARE HERE MARKER === */
         .you-are-here {
             position: absolute;
-            transform: translate(-50%, 35px); /* 車が大きくなった分、少し下に調整 */
+            transform: translate(-50%, 35px); /* 車の画像の分、下に調整 */
             z-index: 25;
             text-align: center;
             pointer-events: none;
@@ -285,24 +285,31 @@
             box-shadow: 0 3px 5px rgba(0,0,0,0.5);
         }
 
-        /* === PLAYER CAR (走る車) === */
+        /* === PLAYER CAR === */
         .player-car {
             position: absolute;
             left: 42%; 
             top: 38%;
-            /* 🏎️は基本的に左向きなので、右向きスタートにするために scaleX(-1) */
+            /* 初期位置を右向き(-1)に */
             transform: translate(-50%, -50%) scaleX(-1); 
             z-index: 100; 
             pointer-events: none; 
         }
 
+        /* 画像用のスタイルに変更 */
         .car-sprite {
-            font-size: 4.5rem; /* 絵文字を大きくして存在感を出す */
-            filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.8));
+            width: 80px; /* トラックの横幅（調整可能） */
+            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.8));
             animation: idleBounce 0.4s infinite alternate ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .car-sprite img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         @keyframes idleBounce {
@@ -425,7 +432,7 @@
 
     <div class="viewport" id="viewport">
         <div class="map-canvas">
-            
+
             <!-- Center Title -->
             <div class="center-title">
                 <h1 class="title-wrapper">
@@ -450,9 +457,11 @@
             </div>
 
             <!-- === PLAYER CAR === -->
-            <!-- レーシングカーの絵文字に変更しました！ -->
             <div id="player-car" class="player-car">
-                <div class="car-sprite">🏎️</div>
+                <div class="car-sprite">
+                    <!-- ★ 絵文字をやめて、track.PNG を指定 -->
+                    <img src="track.PNG?v=2" onerror="this.onerror=null; this.src='track.png?v=2';" alt="Player Car">
+                </div>
             </div>
 
             <!-- === ACTIVE ZONES === -->
