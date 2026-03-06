@@ -267,8 +267,8 @@
         /* === YOU ARE HERE MARKER === */
         .you-are-here {
             position: absolute;
-            /* 車の画像が大きくなった分、さらに下に調整 (65px) */
-            transform: translate(-50%, 65px); 
+            /* ★ 車が大きくなったので、車の下ではなく「車の上」に配置 (-70pxで上に上げる) */
+            transform: translate(-50%, -70px); 
             z-index: 25;
             text-align: center;
             pointer-events: none;
@@ -291,14 +291,14 @@
             position: absolute;
             left: 42%; 
             top: 38%;
-            /* ★ 画像が右向きなので初期値は 1 (反転なし) */
+            /* 画像が右向きなので初期値は 1 (反転なし) */
             transform: translate(-50%, -50%) scaleX(1); 
             z-index: 100; 
             pointer-events: none; 
         }
 
         .car-sprite {
-            /* ★ 車の横幅を150pxに巨大化！ */
+            /* 車の横幅を150pxに巨大化！ */
             width: 150px; 
             filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.9));
             animation: idleBounce 0.4s infinite alternate ease-in-out;
@@ -437,24 +437,18 @@
             <!-- Center Title -->
             <div class="center-title">
                 <h1 class="title-wrapper">
-                    <!-- FHW -->
                     <span class="word-fhw">
                         <span class="char-box"><span class="char-neon">F</span><span class="char-black" style="--i:0">F</span></span><span class="char-box"><span class="char-neon">H</span><span class="char-black" style="--i:1">H</span></span><span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:2">W</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- WORLD -->
                     <span class="word-world">
                         <span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:3">W</span></span><span class="char-box"><span class="char-neon">O</span><span class="char-black" style="--i:4">O</span></span><span class="char-box"><span class="char-neon">R</span><span class="char-black" style="--i:5">R</span></span><span class="char-box"><span class="char-neon">L</span><span class="char-black" style="--i:6">L</span></span><span class="char-box"><span class="char-neon">D</span><span class="char-black" style="--i:7">D</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- MAP -->
                     <span class="word-map">
                         <span class="char-box"><span class="char-neon">M</span><span class="char-black" style="--i:8">M</span></span><span class="char-box"><span class="char-neon">A</span><span class="char-black" style="--i:9">A</span></span><span class="char-box"><span class="char-neon">P</span><span class="char-black" style="--i:10">P</span></span>
                     </span>
                 </h1>
-                <!-- サブタイトル -->
                 <h2>Too fast.&nbsp;&nbsp;&nbsp;Too stupid.&nbsp;&nbsp;&nbsp;Too Funky.</h2>
             </div>
 
@@ -466,8 +460,7 @@
             <!-- === PLAYER CAR === -->
             <div id="player-car" class="player-car">
                 <div class="car-sprite">
-                    <!-- ★ 最新の画像を取得するためのパラメータを ?v=3 に変更 -->
-                    <img src="track.PNG?v=3" onerror="this.onerror=null; this.src='track.png?v=3';" alt="Player Car">
+                    <img src="track.PNG?v=4" onerror="this.onerror=null; this.src='track.png?v=4';" alt="Player Car">
                 </div>
             </div>
 
@@ -544,7 +537,7 @@
             const dx = x - currentX;
             const dy = y - currentY;
             
-            // ★ 右向き画像に合わせて反転ロジックを逆に
+            // 右向き画像に合わせて反転ロジックを逆に
             if (dx > 0) {
                 carDirection = 1; // 右へ向かう場合はそのまま
             } else if (dx < 0) {
