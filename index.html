@@ -59,7 +59,7 @@
             min-width: 1200px;
             min-height: 900px;
             background-color: var(--bg-color);
-            /* ★ 背景画像の上に半透明の黒（rgba）を重ねてスモーク効果を出す */
+            /* 背景画像の上に半透明の黒を重ねてスモーク効果を出す */
             background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('yuka.PNG');
             background-size: cover;
             background-position: center;
@@ -267,7 +267,7 @@
         /* === YOU ARE HERE MARKER === */
         .you-are-here {
             position: absolute;
-            transform: translate(-50%, 25px);
+            transform: translate(-50%, 35px); /* 車が大きくなった分、少し下に調整 */
             z-index: 25;
             text-align: center;
             pointer-events: none;
@@ -290,25 +290,19 @@
             position: absolute;
             left: 42%; 
             top: 38%;
+            /* 🏎️は基本的に左向きなので、右向きスタートにするために scaleX(-1) */
             transform: translate(-50%, -50%) scaleX(-1); 
             z-index: 100; 
             pointer-events: none; 
         }
 
-        /* ★ 車の画像を調整（横幅を80pxに拡大） */
         .car-sprite {
-            width: 80px; 
-            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.8));
+            font-size: 4.5rem; /* 絵文字を大きくして存在感を出す */
+            filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.8));
             animation: idleBounce 0.4s infinite alternate ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .car-sprite img {
-            width: 100%;
-            height: auto;
-            display: block;
         }
 
         @keyframes idleBounce {
@@ -432,29 +426,21 @@
     <div class="viewport" id="viewport">
         <div class="map-canvas">
             
-            <!-- ※タイヤ痕（SVG Roads）は完全に削除しました！ -->
-
             <!-- Center Title -->
             <div class="center-title">
                 <h1 class="title-wrapper">
-                    <!-- FHW -->
                     <span class="word-fhw">
                         <span class="char-box"><span class="char-neon">F</span><span class="char-black" style="--i:0">F</span></span><span class="char-box"><span class="char-neon">H</span><span class="char-black" style="--i:1">H</span></span><span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:2">W</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- WORLD -->
                     <span class="word-world">
                         <span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:3">W</span></span><span class="char-box"><span class="char-neon">O</span><span class="char-black" style="--i:4">O</span></span><span class="char-box"><span class="char-neon">R</span><span class="char-black" style="--i:5">R</span></span><span class="char-box"><span class="char-neon">L</span><span class="char-black" style="--i:6">L</span></span><span class="char-box"><span class="char-neon">D</span><span class="char-black" style="--i:7">D</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- MAP -->
                     <span class="word-map">
                         <span class="char-box"><span class="char-neon">M</span><span class="char-black" style="--i:8">M</span></span><span class="char-box"><span class="char-neon">A</span><span class="char-black" style="--i:9">A</span></span><span class="char-box"><span class="char-neon">P</span><span class="char-black" style="--i:10">P</span></span>
                     </span>
                 </h1>
-                <!-- サブタイトル -->
                 <h2>Too fast.&nbsp;&nbsp;&nbsp;Too stupid.&nbsp;&nbsp;&nbsp;Too Funky.</h2>
             </div>
 
@@ -464,14 +450,9 @@
             </div>
 
             <!-- === PLAYER CAR === -->
-            <!-- 
-              ★ onerrorを追加し、car.PNGがダメだった場合にcar.pngを読み込むようにしました。
-              また、?v=1 を付けてキャッシュ（古い履歴）を無視して最新の画像を読み込ませます。
-            -->
+            <!-- レーシングカーの絵文字に変更しました！ -->
             <div id="player-car" class="player-car">
-                <div class="car-sprite">
-                    <img src="car.PNG?v=1" onerror="this.onerror=null; this.src='car.png?v=1';" alt="Player Car">
-                </div>
+                <div class="car-sprite">🏎️</div>
             </div>
 
             <!-- === ACTIVE ZONES === -->
@@ -534,7 +515,7 @@
         let currentX = 42; 
         let currentY = 38;
         let isDriving = false; 
-        let carDirection = -1; 
+        let carDirection = -1; // 初期値は右向き
 
         function wait(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
