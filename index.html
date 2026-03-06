@@ -60,8 +60,8 @@
             min-width: 1200px;
             min-height: 900px;
             background-color: var(--bg-color);
-            /* ★ 背景画像の設定 */
-            background-image: url('y.PNG');
+            /* ★ 背景画像を yuka.PNG に変更 */
+            background-image: url('yuka.PNG');
             background-size: cover;
             background-position: center;
             overflow: hidden;
@@ -307,13 +307,20 @@
             pointer-events: none; 
         }
 
+        /* ★ 車の画像を調整 */
         .car-sprite {
-            font-size: 3.5rem;
+            width: 60px; /* 車の横幅（調整可能） */
             filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.8));
             animation: idleBounce 0.4s infinite alternate ease-in-out;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .car-sprite img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         @keyframes idleBounce {
@@ -328,7 +335,6 @@
         .zoom-attack {
             z-index: 9999 !important;
             transform-origin: 50% 50% !important;
-            /* UI自体が激しく発光しながら荒ぶって巨大化する */
             animation: whiteFlashAttack 0.3s cubic-bezier(0.7, 0, 1, 1) forwards !important;
             box-shadow: 0 0 200px var(--theme-color), inset 0 0 100px var(--theme-color) !important;
         }
@@ -350,7 +356,6 @@
             z-index: 10000; 
             opacity: 0;
             pointer-events: none;
-            /* 瞬時に白くなる */
             transition: opacity 0.1s ease-out;
         }
 
@@ -489,8 +494,11 @@
             </div>
 
             <!-- === PLAYER CAR === -->
+            <!-- ★ 絵文字から画像に変更 -->
             <div id="player-car" class="player-car">
-                <div class="car-sprite">🚗</div>
+                <div class="car-sprite">
+                    <img src="car.PNG" alt="Player Car">
+                </div>
             </div>
 
             <!-- === ACTIVE ZONES === -->
@@ -553,7 +561,7 @@
         let currentX = 42; 
         let currentY = 38;
         let isDriving = false; 
-        let carDirection = -1; // 初期値は右向き
+        let carDirection = -1; 
 
         function wait(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
@@ -599,7 +607,6 @@
 
         let activeZoomElement = null;
 
-        // ★ メインの突進・ホワイトフラッシュ処理
         async function handleZoneClick(element, url, isLocked) {
             if (isDriving) return; 
             isDriving = true;
@@ -612,42 +619,33 @@
 
             await driveTo(targetX, targetY);
 
-            // 到着後の「アレ？」というタメ
             await wait(300);
 
-            // ★ UI自身が激しく発光しながら迫ってくる！
             activeZoomElement = element;
             element.classList.add('zoom-attack');
             
-            // 拡大の途中で画面全体をホワイトフラッシュさせる (0.15秒後)
             await wait(150);
 
             const whiteflash = document.getElementById('whiteflash-overlay');
             whiteflash.classList.add('active');
 
-            // 真っ白な状態をキープ
             await wait(400);
 
             if (isLocked) {
-                // LOCKEDの場合：フラッシュから覚めると警告が出ている演出
                 const modal = document.getElementById('construction-modal');
                 modal.classList.remove('hidden');
                 
-                // フワッと白飛びから回復させる
                 whiteflash.style.transition = "opacity 0.5s ease";
                 whiteflash.classList.remove('active');
                 
-                // 元の速度に戻しておく
                 setTimeout(() => {
                     whiteflash.style.transition = "opacity 0.1s ease-out";
                 }, 500);
 
                 isDriving = false;
             } else if (url) {
-                // 通常ジャンプ
                 window.location.href = url;
                 
-                // ブラウザバック対策
                 setTimeout(() => {
                     element.classList.remove('zoom-attack');
                     whiteflash.classList.remove('active');
@@ -664,6 +662,10 @@
                 activeZoomElement.classList.remove('zoom-attack');
                 activeZoomElement = null;
             }
+            
+            // YOU ARE HEREマーカーを復活させる場合はここに追加
+            // const yahMarker = document.getElementById('you-are-here-marker');
+            // if (yahMarker) yahMarker.style.opacity = '1';
         }
 
         // --- マップのパン（ドラッグ移動）処理 ---
