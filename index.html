@@ -12,12 +12,11 @@
     <style>
         /* === CSS VARIABLES === */
         :root {
-            --bg-color: #555555; 
+            --bg-color: #111111; 
             --cyan: #00ffff;
             --lime: #ccff00;
             --pink: #ff00ff;
             --text-color: #ffffff;
-            --tire-color: #000000; 
             --font-main: 'Arial Black', Impact, 'Segoe UI', sans-serif;
             --font-stencil: 'Black Ops One', Impact, cursive, sans-serif;
         }
@@ -60,22 +59,11 @@
             min-width: 1200px;
             min-height: 900px;
             background-color: var(--bg-color);
-            /* ★ 背景画像を yuka.PNG に変更 */
-            background-image: url('yuka.PNG');
+            /* ★ 背景画像の上に半透明の黒（rgba）を重ねてスモーク効果を出す */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('yuka.PNG');
             background-size: cover;
             background-position: center;
             overflow: hidden;
-        }
-
-        /* === SVG ROADS (タイヤ痕) === */
-        .roads-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
         }
 
         /* === CENTER TITLE === */
@@ -444,26 +432,6 @@
     <div class="viewport" id="viewport">
         <div class="map-canvas">
             
-            <!-- SVG Roads -->
-            <svg class="roads-layer" xmlns="http://www.w3.org/2000/svg">
-                <g stroke="var(--tire-color)" opacity="0.9">
-                    <line x1="50%" y1="15%" x2="50%" y2="85%" stroke-width="14" stroke-dasharray="12 10" transform="translate(-16, 0)" />
-                    <line x1="50%" y1="15%" x2="50%" y2="85%" stroke-width="14" stroke-dasharray="12 10" transform="translate(16, 0)" />
-                </g>
-                <g stroke="var(--tire-color)" opacity="0.9">
-                    <line x1="15%" y1="50%" x2="85%" y2="50%" stroke-width="14" stroke-dasharray="12 10" transform="translate(0, -16)" />
-                    <line x1="15%" y1="50%" x2="85%" y2="50%" stroke-width="14" stroke-dasharray="12 10" transform="translate(0, 16)" />
-                </g>
-                <g stroke="var(--tire-color)" opacity="0.7">
-                    <line x1="50%" y1="50%" x2="25%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, -6)" />
-                    <line x1="50%" y1="50%" x2="25%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, 6)" />
-                    <line x1="50%" y1="50%" x2="75%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, -6)" />
-                    <line x1="50%" y1="50%" x2="75%" y2="25%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, 6)" />
-                    <line x1="50%" y1="50%" x2="75%" y2="80%" stroke-width="10" stroke-dasharray="10 8" transform="translate(6, 6)" />
-                    <line x1="50%" y1="50%" x2="75%" y2="80%" stroke-width="10" stroke-dasharray="10 8" transform="translate(-6, -6)" />
-                </g>
-            </svg>
-
             <!-- Center Title -->
             <div class="center-title">
                 <h1 class="title-wrapper">
@@ -494,7 +462,6 @@
             </div>
 
             <!-- === PLAYER CAR === -->
-            <!-- ★ 絵文字から画像に変更 -->
             <div id="player-car" class="player-car">
                 <div class="car-sprite">
                     <img src="car.PNG" alt="Player Car">
@@ -662,10 +629,6 @@
                 activeZoomElement.classList.remove('zoom-attack');
                 activeZoomElement = null;
             }
-            
-            // YOU ARE HEREマーカーを復活させる場合はここに追加
-            // const yahMarker = document.getElementById('you-are-here-marker');
-            // if (yahMarker) yahMarker.style.opacity = '1';
         }
 
         // --- マップのパン（ドラッグ移動）処理 ---
