@@ -16,6 +16,11 @@
             --cyan: #00ffff;
             --lime: #ccff00;
             --pink: #ff00ff;
+            --red: #ff3333; 
+            --orange: #ff9900; 
+            --yellow: #ffcc00; 
+            --purple: #b026ff; 
+            --white: #ffffff; 
             --text-color: #ffffff;
             --font-main: 'Arial Black', Impact, 'Segoe UI', sans-serif;
             --font-stencil: 'Black Ops One', Impact, cursive, sans-serif;
@@ -56,8 +61,8 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            min-width: 1200px;
-            min-height: 900px;
+            min-width: 1800px;
+            min-height: 1300px;
             background-color: var(--bg-color);
             /* 背景画像の上に半透明の黒を重ねてスモーク効果を出す */
             background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('yuka.PNG');
@@ -159,6 +164,8 @@
         /* === ZONES === */
         .zone {
             position: absolute;
+            /* ロード前は一旦画面外に置いてチラつきを防ぐ */
+            left: -999%; top: -999%;
             transform: translate(-50%, -50%);
             z-index: 20;
             width: 220px;
@@ -218,6 +225,11 @@
         .zone.cyan { --theme-color: var(--cyan); }
         .zone.lime { --theme-color: var(--lime); }
         .zone.pink { --theme-color: var(--pink); }
+        .zone.red  { --theme-color: var(--red); }
+        .zone.orange { --theme-color: var(--orange); }
+        .zone.yellow { --theme-color: var(--yellow); }
+        .zone.purple { --theme-color: var(--purple); } 
+        .zone.white  { --theme-color: var(--white); } 
 
         /* === LOCKED ZONES === */
         .zone.locked {
@@ -232,6 +244,17 @@
 
         .zone.locked:hover {
             --theme-color: #ffffff; 
+        }
+
+        /* 中身は見えているが準備中（LOCKED）のゾーン */
+        .zone.locked-visible {
+            background: #1a1a1a;
+            border-style: dashed;
+            opacity: 0.7; 
+        }
+
+        .zone.locked-visible:hover {
+            opacity: 1; 
         }
 
         .locked-badge {
@@ -288,6 +311,7 @@
         /* === PLAYER CAR === */
         .player-car {
             position: absolute;
+            /* 車のスタート位置は固定 */
             left: 42%; 
             top: 38%;
             transform: translate(-50%, -50%) scaleX(1) rotate(0deg); 
@@ -368,12 +392,14 @@
         }
 
         .modal-box {
+            /* 変数を使って動的に色を変えられるように設定 */
+            --modal-color: var(--cyan);
             background: #111;
-            border: 4px solid var(--cyan);
+            border: 4px solid var(--modal-color);
             padding: 40px;
             text-align: center;
             transform: scale(1);
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease;
             max-width: 90%;
             width: 400px;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
@@ -390,11 +416,12 @@
 
         .modal-box h3 {
             font-family: var(--font-stencil);
-            color: var(--cyan);
+            color: var(--modal-color);
             font-size: 1.8rem;
             margin-bottom: 15px;
             text-transform: uppercase;
             font-style: italic;
+            transition: color 0.2s ease;
         }
 
         .modal-box p {
@@ -407,7 +434,7 @@
 
         .modal-btn {
             font-family: var(--font-stencil);
-            background: var(--cyan);
+            background: var(--modal-color);
             color: #000;
             border: none;
             padding: 12px 30px;
@@ -433,19 +460,14 @@
             <!-- Center Title -->
             <div class="center-title">
                 <h1 class="title-wrapper">
-                    <!-- FHW -->
                     <span class="word-fhw">
                         <span class="char-box"><span class="char-neon">F</span><span class="char-black" style="--i:0">F</span></span><span class="char-box"><span class="char-neon">H</span><span class="char-black" style="--i:1">H</span></span><span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:2">W</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- WORLD -->
                     <span class="word-world">
                         <span class="char-box"><span class="char-neon">W</span><span class="char-black" style="--i:3">W</span></span><span class="char-box"><span class="char-neon">O</span><span class="char-black" style="--i:4">O</span></span><span class="char-box"><span class="char-neon">R</span><span class="char-black" style="--i:5">R</span></span><span class="char-box"><span class="char-neon">L</span><span class="char-black" style="--i:6">L</span></span><span class="char-box"><span class="char-neon">D</span><span class="char-black" style="--i:7">D</span></span>
                     </span>
                     <span class="space">&nbsp;</span>
-                    
-                    <!-- MAP -->
                     <span class="word-map">
                         <span class="char-box"><span class="char-neon">M</span><span class="char-black" style="--i:8">M</span></span><span class="char-box"><span class="char-neon">A</span><span class="char-black" style="--i:9">A</span></span><span class="char-box"><span class="char-neon">P</span><span class="char-black" style="--i:10">P</span></span>
                     </span>
@@ -461,47 +483,84 @@
             <!-- === PLAYER CAR === -->
             <div id="player-car" class="player-car">
                 <div class="car-sprite">
-                    <img src="track.PNG?v=5" onerror="this.onerror=null; this.src='track.png?v=5';" alt="Player Car">
+                    <img src="track.PNG?v=17" onerror="this.onerror=null; this.src='track.png?v=17';" alt="Player Car">
                 </div>
             </div>
 
-            <!-- === ACTIVE ZONES === -->
-            <div class="zone lime" style="left: 50%; top: 15%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/GARAGE-01/', false)">
+            <!-- ========================================================
+                 ★ 12個のUI
+                 （初期位置は隠してあります。JSで時計の12箇所にランダム配置されます）
+            ========================================================= -->
+
+            <div class="zone lime" onclick="handleZoneClick(this, 'https://p-one-star.github.io/GARAGE-01/', false)">
                 <div class="zone-icon">🌭</div>
-                <div class="zone-title">GARAGE</div>
-                <div class="zone-desc">Secret underground garage where machines are built.</div>
+                <div class="zone-title">HOTDOG MAFIA</div>
+                <div class="zone-desc">Secret Base<br>Sleeping souls</div>
             </div>
 
-            <div class="zone cyan" style="left: 15%; top: 50%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-STORAGE/', false)">
-                <div class="zone-icon">🍔</div>
-                <div class="zone-title">FUNKY STORAGE</div>
-                <div class="zone-desc">Warehouse of funky products and posters.</div>
+            <div class="zone red" onclick="handleZoneClick(this, 'https://p-one-star.github.io/WILD-ZONE/', false)">
+                <div class="zone-icon">🍅</div>
+                <div class="zone-title">WILD TOMATO</div>
+                <div class="zone-desc">Mysteries Farm<br>How many made it?</div>
             </div>
 
-            <div class="zone pink" style="left: 50%; top: 85%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/RIOT-CARNIVAL/', false)">
+            <div class="zone yellow locked-visible" onclick="handleZoneClick(this, '', 'construction')">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-icon">🍭</div>
+                <div class="zone-title">STUPID STORAGE</div>
+                <div class="zone-desc">Too many machines<br>63 Underground</div>
+            </div>
+
+            <div class="zone cyan" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-COMIC/', false)">
+                <div class="zone-icon">🍩</div>
+                <div class="zone-title">DONUT GANG</div>
+                <div class="zone-desc">Strange stories<br>Inside the hole</div>
+            </div>
+
+            <div class="zone purple locked-visible" onclick="handleZoneClick(this, '', 'construction')">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-icon">🍥</div>
+                <div class="zone-title">GLITCH LAB</div>
+                <div class="zone-desc">AI accidents<br>Desert parking</div>
+            </div>
+
+            <div class="zone orange locked-visible" onclick="handleZoneClick(this, '', 'construction')">
+                <div class="locked-badge">LOCKED</div>
+                <div class="zone-icon">🍺</div>
+                <div class="zone-title">CRAFT BEER</div>
+                <div class="zone-desc">Labyrinth Brewery<br>Wait and see.</div>
+            </div>
+
+            <div class="zone pink" onclick="handleZoneClick(this, 'https://p-one-star.github.io/RIOT-CARNIVAL/', false)">
                 <div class="zone-icon">🌶</div>
-                <div class="zone-title">RIOT CARNIVAL</div>
-                <div class="zone-desc">Chaotic carnival of wild characters.</div>
+                <div class="zone-title">VOLCANO 300%</div>
+                <div class="zone-desc">Too hot?<br>Too sweet?</div>
             </div>
 
-            <div class="zone cyan" style="left: 85%; top: 50%;" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-COMIC/', false)">
-                <div class="zone-icon">🎨</div>
-                <div class="zone-title">FUNKY COMIC</div>
-                <div class="zone-desc">Comic area showing FHW comic stories.</div>
+            <div class="zone cyan" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FUNKY-STORAGE/', false)">
+                <div class="zone-icon">🍔</div>
+                <div class="zone-title">BURGER STADIUM</div>
+                <div class="zone-desc">Official Weapon<br>Street Gear</div>
             </div>
 
-            <!-- === LOCKED ZONES === -->
-            <div class="zone locked" style="left: 25%; top: 25%;" onclick="handleZoneClick(this, '', true)">
+            <div class="zone white" onclick="handleZoneClick(this, 'https://p-one-star.github.io/FHW-WORLD-MAP/', false)">
+                <div class="zone-icon">🍙</div>
+                <div class="zone-title">O N I G I R I</div>
+                <div class="zone-desc">Japan Origin<br>Don't touch</div>
+            </div>
+
+            <!-- ★ 完全な「？」ゾーン (開くたびに色と絵文字がランダムになります) -->
+            <div class="zone locked" onclick="handleZoneClick(this, '', 'alien')">
                 <div class="locked-badge">LOCKED</div>
                 <div class="zone-huge-question">?</div>
             </div>
 
-            <div class="zone locked" style="left: 75%; top: 25%;" onclick="handleZoneClick(this, '', true)">
+            <div class="zone locked" onclick="handleZoneClick(this, '', 'ghost')">
                 <div class="locked-badge">LOCKED</div>
                 <div class="zone-huge-question">?</div>
             </div>
 
-            <div class="zone locked" style="left: 75%; top: 80%;" onclick="handleZoneClick(this, '', true)">
+            <div class="zone locked" onclick="handleZoneClick(this, '', 'skull')">
                 <div class="locked-badge">LOCKED</div>
                 <div class="zone-huge-question">?</div>
             </div>
@@ -509,18 +568,56 @@
         </div>
     </div>
 
-    <!-- === CUSTOM MODAL (LOCKED用) === -->
+    <!-- === CUSTOM MODAL (各種LOCKED用) === -->
     <div id="construction-modal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.8);">
-        <div class="modal-box">
-            <div class="modal-icon">🚧</div>
-            <h3>AREA UNDER CONSTRUCTION</h3>
-            <p>This zone is currently sealed off by the FHW crew. Check back later for the grand opening!</p>
-            <button class="modal-btn" onclick="closeModal()">Got It</button>
+        <div class="modal-box" id="modal-box">
+            <div class="modal-icon" id="modal-icon">🚧</div>
+            <h3 id="modal-title">AREA UNDER CONSTRUCTION</h3>
+            <p id="modal-desc">This zone is currently sealed off by the FHW crew. Check back later for the grand opening!</p>
+            <button class="modal-btn" onclick="closeModal()">GOT IT</button>
         </div>
     </div>
 
     <!-- === JAVASCRIPT === -->
     <script>
+        // ==========================================
+        // ★ ゾーンを時計の12箇所にランダム配置する関数
+        // ==========================================
+        function randomizeZones() {
+            const clockPositions = [
+                { left: 50, top: 10 },     // 12時
+                { left: 70, top: 15.4 },   // 1時
+                { left: 84.6, top: 30 },   // 2時
+                { left: 90, top: 50 },     // 3時
+                { left: 84.6, top: 70 },   // 4時
+                { left: 70, top: 84.6 },   // 5時
+                { left: 50, top: 90 },     // 6時
+                { left: 30, top: 84.6 },   // 7時
+                { left: 15.4, top: 70 },   // 8時
+                { left: 10, top: 50 },     // 9時
+                { left: 15.4, top: 30 },   // 10時
+                { left: 30, top: 15.4 }    // 11時
+            ];
+
+            // 座標リストをシャッフル (Fisher-Yates)
+            for (let i = clockPositions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [clockPositions[i], clockPositions[j]] = [clockPositions[j], clockPositions[i]];
+            }
+
+            const zones = document.querySelectorAll('.zone');
+            zones.forEach((zone, index) => {
+                if(clockPositions[index]) {
+                    zone.style.left = `${clockPositions[index].left}%`;
+                    zone.style.top = `${clockPositions[index].top}%`;
+                }
+            });
+        }
+
+
+        // ==========================================
+        // 車の移動と演出のロジック
+        // ==========================================
         const car = document.getElementById('player-car');
         let currentX = 42; 
         let currentY = 38;
@@ -531,27 +628,22 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        // 🚗 サスペンション風の動的アクションを計算して移動
         async function moveSegment(x, y) {
             if (currentX === x && currentY === y) return;
 
             const dx = x - currentX;
             const dy = y - currentY;
             
-            // 左右の向きを決定
             if (dx > 0) {
                 carDirection = 1; 
             } else if (dx < 0) {
                 carDirection = -1; 
             }
 
-            // ★ 車体の傾き（角度）を計算
             let angle = 0;
             if (dx !== 0 || dy !== 0) {
-                // 移動方向の角度を計算
                 let rawAngle = Math.atan2(dy, dx) * 180 / Math.PI;
                 
-                // 左を向いている時は、画像が反転しているので角度の扱いを調整
                 if (carDirection === -1) {
                     if (rawAngle > 0) {
                         rawAngle = 180 - rawAngle;
@@ -560,33 +652,27 @@
                     }
                 }
                 
-                // 真上・真下の場合は最大で±25度まで傾ける
                 if (dx === 0) {
-                    if (dy > 0) angle = 25;  // 下へ進む時はノーズダイブ
-                    if (dy < 0) angle = -25; // 上へ進む時はウィリー
+                    if (dy > 0) angle = 25;  
+                    if (dy < 0) angle = -25; 
                 } else {
-                    // 斜め移動の場合も、角度がつきすぎないように制限
                     angle = Math.max(-25, Math.min(25, rawAngle));
                 }
             }
 
-            // 1. 車の向きをクイッと変える (傾き付き)
             car.style.transition = 'transform 0.2s ease';
             car.style.transform = `translate(-50%, -50%) scaleX(${carDirection}) rotate(${angle}deg)`;
             await wait(200); 
 
-            // 2. 距離を計算してスピードを決定
             const dist = Math.sqrt(dx*dx + dy*dy);
             const speedMs = Math.max(400, dist * 12); 
 
-            // 3. 目的地へ走る
             car.style.transition = `left ${speedMs}ms linear, top ${speedMs}ms linear, transform 0.2s ease`;
             car.style.left = `${x}%`;
             car.style.top = `${y}%`;
 
             await wait(speedMs); 
             
-            // 4. 到着したら車体を水平に戻す（サスペンションがピタッと止まる演出）
             car.style.transition = 'transform 0.2s ease';
             car.style.transform = `translate(-50%, -50%) scaleX(${carDirection}) rotate(0deg)`;
             await wait(150);
@@ -599,7 +685,6 @@
             const centerX = 50;
             const centerY = 50;
 
-            // 中央を経由して目的地へ
             if ((currentX !== centerX || currentY !== centerY) && (targetX !== currentX || targetY !== currentY)) {
                 await moveSegment(centerX, centerY);
             }
@@ -608,7 +693,24 @@
 
         let activeZoomElement = null;
 
-        async function handleZoneClick(element, url, isLocked) {
+        // ランダムに使用する絵文字とカラーの配列
+        const randomEmojis = ['😈', '🤡', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃'];
+        const randomColors = [
+            '#00ffff', // シアン
+            '#ccff00', // ライム
+            '#ff00ff', // ピンク
+            '#ff3333', // レッド
+            '#ff9900', // オレンジ
+            '#ffcc00', // イエロー
+            '#b026ff', // パープル
+            '#00ff00', // グリーン
+            '#0088ff', // ブルー
+            '#ff0088', // マゼンタ
+            '#ffd700', // ゴールド
+            '#ffffff'  // ホワイト
+        ];
+
+        async function handleZoneClick(element, url, lockedType) {
             if (isDriving) return; 
             isDriving = true;
 
@@ -632,7 +734,37 @@
 
             await wait(400);
 
-            if (isLocked) {
+            if (lockedType) {
+                const modalBox = document.getElementById('modal-box');
+                const modalIcon = document.getElementById('modal-icon');
+                const modalTitle = document.getElementById('modal-title');
+                const modalDesc = document.getElementById('modal-desc');
+
+                // ★ 「？」ブロックの場合は色と絵文字をランダム抽選！
+                if (lockedType === 'alien' || lockedType === 'ghost' || lockedType === 'skull') {
+                    const randomEmoji = randomEmojis[Math.floor(Math.random() * randomEmojis.length)];
+                    const randomColor = randomColors[Math.floor(Math.random() * randomColors.length)];
+                    
+                    modalIcon.innerHTML = randomEmoji;
+                    modalTitle.innerHTML = 'LOCKED';
+                    modalBox.style.setProperty('--modal-color', randomColor);
+
+                    if (lockedType === 'alien') {
+                        modalDesc.innerHTML = 'UNKNOWN AREA<br>Maybe.';
+                    } else if (lockedType === 'ghost') {
+                        modalDesc.innerHTML = 'CLASSIFIED<br>Maybe…';
+                    } else if (lockedType === 'skull') {
+                        modalDesc.innerHTML = 'DON\'T TOUCH<br>Maybe not.';
+                    }
+                } 
+                // キャンディやビールなどの中身が見えている工事中ブロック
+                else if (lockedType === 'construction') {
+                    modalIcon.innerHTML = '🚧';
+                    modalTitle.innerHTML = 'AREA UNDER CONSTRUCTION';
+                    modalDesc.innerHTML = 'This zone is currently sealed off by the FHW crew. Check back later for the grand opening!';
+                    modalBox.style.setProperty('--modal-color', 'var(--cyan)');
+                }
+
                 const modal = document.getElementById('construction-modal');
                 modal.classList.remove('hidden');
                 
@@ -665,13 +797,21 @@
             }
         }
 
+        // ==========================================
+        // 初期化処理（ロード時）
+        // ==========================================
         window.addEventListener('load', () => {
+            randomizeZones();
+
             const viewport = document.getElementById('viewport');
             const scrollLeft = (viewport.scrollWidth - viewport.clientWidth) / 2;
             const scrollTop = (viewport.scrollHeight - viewport.clientHeight) / 2;
             viewport.scrollTo({ left: scrollLeft, top: scrollTop, behavior: 'smooth' });
         });
 
+        // ==========================================
+        // マップのドラッグ移動
+        // ==========================================
         const viewport = document.getElementById('viewport');
         let isDown = false, startX, startY, scrollLeft, scrollTop;
 
